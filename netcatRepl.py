@@ -142,7 +142,6 @@ def main():
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hle:t:p:cu:", ["help", "listen", "execute", "target", "port", "command", "upload"]);
-
     except getopt.GetoptError as eRR:
         print str(eRR);
         usage();
@@ -165,12 +164,12 @@ def main():
         else:
             assert False, "Unknown Option";
 
-        if not listen and len(target) and port > 0:
-            # Blocking - use CTRL-D if not sending input
-            buffer = sys.stdin.read();
-            clientSender(buffer);
+    if not listen and len(target) and port > 0:
+        # Blocking - use CTRL-D if not sending input
+        buffer = sys.stdin.read();
+        clientSender(buffer);
 
-        if listen:
-            serverLoop();
+    if listen:
+        serverLoop();
 
 main();
