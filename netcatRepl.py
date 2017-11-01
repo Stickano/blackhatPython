@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 import sys;
 import socket;
 import getopt;
@@ -41,41 +42,40 @@ def clientSender(buffer):
 
         while True:
             recv_len = 1;
-            answer = "";
+            answer   = "";
 
             while recv_len:
-                data = client.recv(4096);
+                data     = client.recv(4096);
                 recv_len = len(data);
-                answer += data;
+                answer  += data;
 
                 if recv_len < 4096:
                     break;
 
-                print answer;
+            print answer,
 
-                buffer = raw_input("");
-                buffer += "\n";
-                client.send(buffer);
+            buffer = raw_input("");
+            buffer+= "\n";
+            client.send(buffer);
+    except:
+        raise
+        client.close();
 
-            except:
-                print "[*] Error! Exiting.";
-                client.close();
-
-# Server Loop
-def serverLoop:
+# Listener
+def serverLoop():
     global target;
 
-    # If target is NOT set, listen to all devices
+    # If target is not set, listen to all devices
     if not len(target):
         target = "0.0.0.0";
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
-    server.bind((taget, port));
+    server.bind((target, port));
     server.listen(5);
 
     while True:
         client_socket, addr = server.accept();
-        client_thread = thread.Thread(target=clientHandler, args=(client_socket));
+        client_thread = thread.Thread(target=clientHandler, args=(client_socket,));
         client_thread.start();
 
 # Commands
@@ -89,43 +89,45 @@ def runCommand(command):
 
     return output;
 
-# Upload
+# Logic for upload, execution and shell
 def clientHandler(client_socket):
     global upload
     global execute
     global command
 
+    # Check for upload
     if len(upload_dest):
         file_buffer = "";
         while True:
             data = client_socket.recv(1024);
-
             if not data:
                 break;
             else:
                 file_buffer += data;
 
-            try:
-                file_desc = open(upload_dest, "wb");
-                file_desc.write(file_buffer);
-                file_desc.close();
-                client_socket.send("File saved to %s\r\n" % upload_dest);
-            except:
-                client_socket.send("Failed to save file to %s\r\n" % upload_dest);
+        try:
+            file_desc = open(upload_dest, "wb");
+            file_desc.write(file_buffer);
+            file_desc.close();
+            client_socket.send("File saved to %s\r\n" % upload_dest);
+        except:
+            client_socket.send("Failed to save file to %s\r\n" % upload_dest);
 
-            if len(execute):
-                output = runCommand(execute);
-                client_socket.send(output);
+    # Check for command execution
+    if len(execute):
+        output = runCommand(execute);
+        client_socket.send(output);
 
-            if command:
-                while True:
-                    client_socket.send("$ netcatRepl:#");
-                    cmd_buffer = "";
-                    while "\n" not in cmd_buffer:
-                        cmd_buffer += client_socket.recv(1024);
+    # Check for command shell
+    if command:
+        while True:
+            client_socket.send("netcatRepl:# ");
+            cmd_buffer = "";
+            while "\n" not in cmd_buffer:
+                cmd_buffer += client_socket.recv(1024);
 
-                    response = runCommand(cmd_buffer);
-                    client_socket.send(response);
+            response = runCommand(cmd_buffer);
+            client_socket.send(response);
 
 def main():
     global listen;
@@ -139,7 +141,7 @@ def main():
         usage();
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hle:t:p:cu:", ["help", "listen", "execute", "port", "command", "upload"]);
+        opts, args = getopt.getopt(sys.argv[1:], "hle:t:p:cu:", ["help", "listen", "execute", "target", "port", "command", "upload"]);
 
     except getopt.GetoptError as eRR:
         print str(eRR);

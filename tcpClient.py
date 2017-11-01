@@ -1,7 +1,8 @@
+#!/usr/bin/env python2
 import socket;
 
-target_host = "http://google.com";
-target_port = 80;
+target_host = "127.0.0.1";
+target_port = 9999;
 
 # AF_INET = IPv4
 # SOCK_STREAM = TCP client

@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 import socket;
 import threading as thread;
 
@@ -19,5 +20,5 @@ def clientHandler(client_socket):
 while True:
     client, addr = server.accept();
     print "Connection accepted from: %s:%d" % (addr[0], addr[1]);
-    client_handler = thread.Thread(target=clientHandler, args=(client));
+    client_handler = thread.Thread(target=clientHandler, args=(client,));
     client_handler.start();
