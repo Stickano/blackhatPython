@@ -6,13 +6,13 @@ These tools are created with the help of "Blackhat Python: Python Programming fo
 Often when you're connected to a server, you don't necessarily have the right tools at hand. Experienced system administrators often removes packages like `netcat` - and you can forget all about `Wireshark`. Luckily we often find the `Python` package to be installed on such servers, though, and that's where these tools come in handy - a replacement for typical needed network tools. 
 
 ## Table of Content
-* [Host Scanner](host-scanner)
-* [Netcat Replacement](netcat-replacement)
-* [SSH Command](ssh-command)
-* [SSH Reverse](ssh-reverse)
-* [TCP Client and Server](tcp-client-and-server)
-* [TCP Proxy](tcp-proxy)
-* [UDP Client](udp-client)
+* [Host Scanner](#host-scanner)
+* [Netcat Replacement](#netcat-replacement)
+* [SSH Command](#ssh-command)
+* [SSH Reverse](#ssh-reverse)
+* [TCP Client and Server](#tcp-client-and-server)
+* [TCP Proxy](#tcp-proxy)
+* [UDP Client](#udp-client)
 
 <br><br>
 ### Host Scanner
@@ -22,7 +22,7 @@ First you'd have to figure the local IP of the device you're connected to - some
 
 Run it with root privileges;
 
-    sudo python2 hostScanner.py
+    $ sudo python2 hostScanner.py
 
 After just a few seconds you'll begin to get devices that responded to a UDP broadcast.
 
@@ -58,11 +58,11 @@ echo 'Hello World' | ./netcatRepl.py -t 192.168.0.1 -p 5555
 
 You can test it locally by first firing up a listener;
 
-    ./netcatRepl.py -l -p 9999 -c
+    $ ./netcatRepl.py -l -p 9999 -c
     
 The `-c` will initialize a command shell for the client machine. Then fire up a second replacement tool, without the listener;
 
-    ./netcatRepl.py -t localhost -p 9999
+    $ ./netcatRepl.py -t localhost -p 9999
     
 On your client, hit `CTRL-D` to interact with the "server" which initializes the command shell;
 
@@ -89,7 +89,7 @@ Fire off a quick command against a SSH host, that you already have the right cre
 
 This requires you to have the `Paramiko` package installed - do so with your package-manager (preferred) or with `pip` ex.
 
-    sudo pacman -S python2-paramiko
+    $ sudo pacman -S python2-paramiko
 
 First define your SSH Host, Credentials and Command at the last line in this script. My test server is called `serv` and I'll be running the command `id` - Change the IP accordingly;
 
@@ -112,17 +112,17 @@ We'll be using `sshServer.py` and `sshReverseCmd.py` for this magic.
 
 This requires you to have the `Paramiko` package installed - do so with your package-manager (preferred) or with `pip` ex.
 
-    sudo pacman -S python2-paramiko
+    $ sudo pacman -S python2-paramiko
     
 Note that you'll have to pass along a SSH-Key in the server file. You could use this [Paramiko test key](https://github.com/paramiko/paramiko/blob/master/demos/test_rsa.key) if you feel lazy.
 
 There's no example for this one (didn't want to be bothered firing up a Windows machine), but the idea is that you fire up a cmd window (on your Windows system), run the server file and point it to your own SSH server - Change the IP and Port accordingly;
 
-    sshServer.py 192.168.0.1 22
+    $ sshServer.py 192.168.0.1 22
     
 Now edit the `sshReverseCmd.py` (last line) with the Credentials for your own SSH server, and run it - This will be acting as our client; 
 
-    sshReverseCmd.py
+    $ sshReverseCmd.py
 
 <br><br>
 ### TCP Client and Server
@@ -151,11 +151,32 @@ The server only responds with `ACK!`, but you can easily expand this simple conc
 
 <br><br>
 ### TCP Proxy
-Read trafic data to get a better understanding of protocols with the `tcpProxy.py`. A nice little test would be to point it at a ftp server, change accordingly - Port 21 is priviledges, so run it with `sudo`;
+Read trafic data to get a better understanding of the applications using the protocol with the `tcpProxy.py`. A nice little test would be to point it at a ftp server. We'll test it on our localhost along with a FTP server that makes sense to you - Port 21 is priviledges, so run it with `sudo`;
 
 ```
-We'll continue this later
+$ sudo ./tcpProxy.py localhost 21 ftp.SERVER.com 21 True
+[*] Listening on localhost:21
+```
+
+Now fire up your FTP application and point it to `localhost` at port `21` and connect.
+
+```
+[==>] Received connection from 127.0.0.1:53230
+0000 32 32 30 20 57 65 6C 63 6F 6D 65 20 74 6F 20 6C  220 Welcome to l
+0010 69 6E 75 78 31 34 2E 75 6E 6F 65 75 72 6F 2E 63  inux14.unoeuro.c
+0020 6F 6D 2E 20 54 4C 53 20 69 73 20 73 75 70 70 6F  om. TLS is suppo
+0030 72 74 65 64 2E 0D 0A                             rted...
+[<==] Sending 55 bytes to localhost.
+[==>] Received 10 bytes from localhost.
+0000 41 55 54 48 20 54 4C 53 0D 0A                    AUTH TLS..
+[==>] Sent to remote.
+[<==] Received 25 bytes from remote.
+0000 32 33 34 20 41 55 54 48 20 54 4C 53 20 73 75 63  234 AUTH TLS suc
+0010 63 65 73 73 66 75 6C 0D 0A                       cessful..
+[<==] Sent to localhost.
+[*] No more data. Closing connection.
 ```
 
 <br><br>
 ### UDP Client
+Just as our TCP client, the UDP client isn't much different. Define a target IP and Port at line 4 & 5. The UDP client will fire off a message defined at line 9 and wait for the reponse.  
